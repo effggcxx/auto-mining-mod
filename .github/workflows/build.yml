@@ -26,6 +26,7 @@ jobs:
         if: failure()
         run: |
           {
+            grep -A14 "No matching variant" build.log | cut -c1-300 | head -40
             grep -nE "error:|warning: \[|FAILED|What went wrong|Could not|Caused by|^\s+symbol:|^\s+location:" build.log | head -60
             echo "--- tail ---"
             tail -n 40 build.log
