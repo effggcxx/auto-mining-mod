@@ -20,7 +20,18 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Build
-        run: ./gradlew build --stacktrace
+        run: ./gradlew build --stacktrace 2>&1 | tee build.log; exit ${PIPESTATUS[0]}
+
+      - name: Surface build errors
+        if: failure()
+        run: |
+          {
+            grep -nE "error:|warning: \[|FAILED|What went wrong|Could not|Caused by|^\s+symbol:|^\s+location:" build.log | head -60
+            echo "--- tail ---"
+            tail -n 40 build.log
+          } | head -c 30000 > summary.txt
+          MSG=$(python3 -c "import sys,urllib.parse;print(open('summary.txt').read().replace('%','%25').replace('\r','%0D').replace('\n','%0A'))")
+          echo "::error title=build log::$MSG"
 
       - name: Upload JAR
         uses: actions/upload-artifact@v4
