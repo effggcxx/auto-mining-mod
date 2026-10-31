@@ -41,13 +41,13 @@ public final class SmoothMinerClient implements ClientModInitializer {
             enabled = !enabled;
             if (!enabled) stop(client);
             if (client.player != null) {
-                client.player.displayClientMessage(
-                        Component.literal("SmoothMiner " + (enabled ? "enabled" : "disabled")), true);
+                client.player.sendOverlayMessage(
+                        Component.literal("SmoothMiner " + (enabled ? "enabled" : "disabled")));
             }
         }
 
         if (!enabled || client.player == null || client.level == null
-                || client.gameMode == null || client.screen != null) {
+                || client.gameMode == null || client.gui.screen() != null) {
             stopAttack(client);
             return;
         }
