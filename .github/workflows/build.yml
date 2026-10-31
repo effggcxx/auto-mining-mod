@@ -34,6 +34,21 @@ jobs:
           MSG=$(python3 -c "import sys,urllib.parse;print(open('summary.txt').read().replace('%','%25').replace('\r','%0D').replace('\n','%0A'))")
           echo "::error title=build log::$MSG"
 
+      - name: Inspect 26.2 API
+        if: failure()
+        run: |
+          JAR=$(find ~/.gradle -name 'minecraft*.jar' -path '*loom*' ! -name '*sources*' -size +5M | head -1)
+          echo "jar=$JAR"
+          {
+            echo "JAR: $JAR"
+            for c in net.minecraft.client.Minecraft net.minecraft.client.gui.Gui net.minecraft.world.entity.player.Player net.minecraft.client.player.LocalPlayer; do
+              echo "=== $c"
+              javap -cp "$JAR" -public "$c" 2>/dev/null | grep -iE "screen|message|overlay|actionbar|sendSystem|displayClient|hitResult" | sed 's/^ *//'
+            done
+          } > api.txt
+          MSG=$(python3 -c "print(open('api.txt').read()[:20000].replace('%','%25').replace('\r','%0D').replace('\n','%0A'))")
+          echo "::error title=api dump::$MSG"
+
       - name: Upload JAR
         uses: actions/upload-artifact@v4
         with:
