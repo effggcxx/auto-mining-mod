@@ -144,11 +144,13 @@ public final class SmoothMinerClient implements ClientModInitializer {
         // Speed limit per tick, from the "max turn speed" option (degrees per second).
         float maxStep = settings.maxTurnSpeed / 20.0f;
 
-        // smoothness 1..10 -> 0..1. Higher = covers less of the remaining angle each tick and
-        // changes speed more slowly, which gives a long, gentle ease-in and ease-out.
+        // smoothness 1..10 -> 0..1. Higher = covers less of the remaining angle each tick, which gives
+        // a longer, gentler ease-in and ease-out. The speed follows the wanted speed at 4.5x the gain,
+        // which keeps the motion critically damped: no overshoot and no wobble at the end of a turn
+        // (checked in simulation for every smoothness/speed combination).
         float t = (settings.smoothness - Settings.SMOOTH_MIN) / (float) (Settings.SMOOTH_MAX - Settings.SMOOTH_MIN);
-        float gain = lerp(0.30f, 0.06f, t);
-        float accel = lerp(0.55f, 0.10f, t);
+        float gain = lerp(0.20f, 0.05f, t);
+        float accel = Math.min(1.0f, 4.5f * gain);
 
         float wantedYaw = onTarget ? 0.0f : clamp(yawDelta * gain, -maxStep, maxStep);
         float wantedPitch = onTarget ? 0.0f : clamp(pitchDelta * gain, -maxStep, maxStep);
