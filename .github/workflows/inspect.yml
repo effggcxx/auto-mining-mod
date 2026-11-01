@@ -34,9 +34,9 @@ jobs:
             for c in ${{ github.event.inputs.classes }}; do
               echo "=== $c"
               if [ -n "${{ github.event.inputs.filter }}" ]; then
-                javap -cp "$CP" -public "$c" 2>&1 | grep -E "${{ github.event.inputs.filter }}|===|Error" | sed 's/^ *//'
+                javap -cp "$CP" -protected "$c" 2>&1 | grep -E "${{ github.event.inputs.filter }}|===|Error" | sed 's/^ *//'
               else
-                javap -cp "$CP" -public "$c" 2>&1 | sed 's/^ *//'
+                javap -cp "$CP" -protected "$c" 2>&1 | sed 's/^ *//'
               fi
             done
           } > api.txt
