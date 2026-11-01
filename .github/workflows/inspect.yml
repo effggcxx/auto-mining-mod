@@ -24,6 +24,9 @@ jobs:
       - name: Resolve jars
         run: ./gradlew build --stacktrace -q || true
       - name: Dump
+        env:
+          CLASSES: ${{ github.event.inputs.classes }}
+          FILTER: ${{ github.event.inputs.filter }}
         run: |
           MC=$(find ~/.gradle -name 'minecraft-merged-deobf-26.2.jar' | head -1)
           MM=$(find ~/.gradle -name 'modmenu-*.jar' ! -name '*sources*' | head -1)
@@ -31,10 +34,10 @@ jobs:
           CP="$MC:$MM:$FA"
           {
             echo "MC=$MC"; echo "MM=$MM"
-            for c in ${{ github.event.inputs.classes }}; do
+            for c in $CLASSES; do
               echo "=== $c"
-              if [ -n "${{ github.event.inputs.filter }}" ]; then
-                javap -cp "$CP" -protected "$c" 2>&1 | grep -E "${{ github.event.inputs.filter }}|===|Error" | sed 's/^ *//'
+              if [ -n "$FILTER" ]; then
+                javap -cp "$CP" -protected "$c" 2>&1 | grep -E "$FILTER|===|Error" | sed 's/^ *//'
               else
                 javap -cp "$CP" -protected "$c" 2>&1 | sed 's/^ *//'
               fi
